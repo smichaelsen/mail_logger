@@ -118,8 +118,8 @@ class LoggingTransport implements TransportInterface, \Stringable
     {
         $settings = [];
         foreach ($GLOBALS['TYPO3_CONF_VARS']['MAIL'] as $key => $value) {
-            // don't log credentials
-            if (str_contains($key, 'password') || str_contains($key, 'username')) {
+            // don't log password
+            if (str_contains($key, 'password')) {
                 continue;
             }
             if (!is_scalar($value)) {
