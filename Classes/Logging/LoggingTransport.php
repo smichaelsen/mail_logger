@@ -64,7 +64,7 @@ class LoggingTransport implements TransportInterface, \Stringable
         $mailLog->setMailTo($this->addressesToString($message->getTo()));
         $mailLog->setMailCopy($this->addressesToString($message->getCc()));
         $mailLog->setMailBlindCopy($this->addressesToString($message->getBcc()));
-        $mailLog->setHeaders($message->getHeaders()->toString());
+        $mailLog->setHeaders($message->getHeaders()->toString() . $this->getTransportSettingsString());
         if ($message instanceof TemplateBasedMailMessage) {
             $mailLog->setTypoScriptKey($message->getTypoScriptKey());
         }
@@ -112,5 +112,21 @@ class LoggingTransport implements TransportInterface, \Stringable
         if (empty($GLOBALS['TCA']['tx_maillogger_domain_model_maillog'])) {
             $GLOBALS['TCA']['tx_maillogger_domain_model_maillog'] = require __DIR__ . '/../../Configuration/TCA/tx_maillogger_domain_model_maillog.php';
         }
+    }
+
+    protected function getTransportSettingsString(): string
+    {
+        $settings = [];
+        foreach ($GLOBALS['TYPO3_CONF_VARS']['MAIL'] as $key => $value) {
+            // don't log credentials
+            if (str_contains($key, 'password') || str_contains($key, 'username')) {
+                continue;
+            }
+            if (!is_scalar($value)) {
+                continue;
+            }
+            $settings[] = $key . ': ' . $value;
+        }
+        return implode("\r\n", $settings);
     }
 }
